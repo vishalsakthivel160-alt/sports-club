@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-night-900 font-sans text-fog-100 antialiased;
+    overflow-x: clip;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display;
+  }
+  ::selection {
+    background: #f26b21;
+    color: #060b14;
+  }
+  :focus-visible {
+    outline: 2px solid #ff8a4d;
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+  }
+  .section-y {
+    @apply py-20 sm:py-28;
+  }
+
+  /* ---- Buttons ---- */
+  .btn {
+    @apply inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-[13px] font-bold uppercase tracking-[0.08em] transition duration-200 ease-out disabled:pointer-events-none disabled:opacity-60;
+  }
+  .btn-sm {
+    @apply px-4 py-2.5;
+  }
+  .btn-md {
+    @apply px-6 py-3.5;
+  }
+  .btn-lg {
+    @apply px-8 py-4 text-sm;
+  }
+  .btn-primary {
+    @apply bg-brand text-night-950 hover:-translate-y-0.5 hover:bg-brand-400 hover:shadow-glow active:translate-y-0;
+  }
+  .btn-light {
+    @apply bg-white text-night-950 hover:-translate-y-0.5 hover:bg-fog-100 active:translate-y-0;
+  }
+  .btn-outline {
+    @apply border border-white/30 text-white hover:border-white hover:bg-white/10;
+  }
+  .btn-whatsapp {
+    @apply bg-[#25D366] text-night-950 hover:-translate-y-0.5 hover:bg-[#3fe07c] active:translate-y-0;
+  }
+
+  /* ---- Forms ---- */
+  .input {
+    @apply w-full rounded-md border border-white/15 bg-night-800 px-4 py-3 text-sm text-fog-100 transition placeholder:text-fog-700 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/40;
+  }
+  .input-error {
+    @apply border-red-400/80 focus:border-red-400 focus:ring-red-400/30;
+  }
+
+  /* ---- Scroll reveal (see components/ui/Reveal.jsx) ---- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ---- Hero entrance: the one orchestrated page-load moment ---- */
+  .hero-rise {
+    animation: hero-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .frame-draw {
+    animation: frame-draw 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  /* Faint court-line grid used behind placeholders and hero fallbacks */
+  .court-lines {
+    background-color: #0f1a2c;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+}
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes frame-draw {
+  from {
+    opacity: 0;
+    clip-path: inset(-2rem 50% -2rem 50%);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(-2rem 0 -2rem 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
