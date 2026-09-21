@@ -6,7 +6,6 @@ import Reveal from '../components/ui/Reveal';
 import Button from '../components/ui/Button';
 import WhatsAppButton from '../components/ui/WhatsAppButton';
 import TurfCard from '../components/cards/TurfCard';
-import TurfDetail from '../components/sections/TurfDetail';
 import CtaBand from '../components/sections/CtaBand';
 import { PRICING_NOTE, TURFS } from '../data/turf';
 import { photo } from '../data/images';
@@ -49,8 +48,6 @@ export default function Turf() {
         </div>
       </section>
 
-      <TurfDetail turf={TURFS[0]} tinted />
-      <TurfDetail turf={TURFS[1]} reverse />
 
       <section className="section-y bg-night-950" aria-labelledby="turf-booking-title">
         <div className="container-x">

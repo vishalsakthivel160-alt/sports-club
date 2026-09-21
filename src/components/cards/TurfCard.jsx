@@ -16,7 +16,7 @@ export default function TurfCard({ turf }) {
   ];
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-night-800 transition duration-300 hover:border-brand/50 hover:shadow-card">
+    <article id={turf.id} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-night-800 transition duration-300 hover:border-brand/50 hover:shadow-card">
       <div className="relative">
         <SmartImage
           src={image}
