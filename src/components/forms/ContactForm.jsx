@@ -1,21 +1,18 @@
 import { useState } from 'react';
-import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { CheckCircle2, MessageSquare } from 'lucide-react';
 import Field from './Field';
 import Button from '../ui/Button';
-import useFormSubmit from '../../hooks/useFormSubmit';
-import { submitContact } from '../../lib/api';
 import { validateContact } from '../../lib/validation';
+import { SITE } from '../../config/site';
 
-const EMPTY = { name: '', email: '', phone: '', message: '', website: '' };
+const EMPTY = { name: '', phone: '', message: '' };
 
-/** General "send us a message" form -> POST /api/contact */
+/** General "send us a message" form -> sends details to WhatsApp */
 export default function ContactForm() {
   const [values, setValues] = useState(EMPTY);
   const [clientErrors, setClientErrors] = useState({});
-  const { status, message, serverErrors, submit, reset } = useFormSubmit(submitContact);
-
-  const errors = { ...serverErrors, ...clientErrors };
-  const submitting = status === 'submitting';
+  const [status, setStatus] = useState('idle');
+  const [waUrl, setWaUrl] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,7 +20,7 @@ export default function ContactForm() {
     setClientErrors((c) => ({ ...c, [name]: undefined }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     const found = validateContact(values);
     setClientErrors(found);
@@ -32,8 +29,28 @@ export default function ContactForm() {
       document.getElementById(`contact-${firstInvalid}`)?.focus();
       return;
     }
-    const ok = await submit({ ...values, name: values.name.trim(), email: values.email.trim(), phone: values.phone.trim() });
-    if (ok) setValues(EMPTY);
+
+    const messageText = `💬 NEW CONTACT MESSAGE
+
+Name: ${values.name.trim()}
+Phone: ${values.phone.trim()}
+Message: ${values.message.trim()}
+
+Please contact the customer as soon as possible.`;
+
+    const cleanNumber = SITE.whatsappNumber.replace(/\D/g, '');
+    const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(messageText)}`;
+
+    setWaUrl(url);
+    window.open(url, '_blank');
+    setStatus('success');
+    setValues(EMPTY);
+  };
+
+  const handleReset = () => {
+    setStatus('idle');
+    setWaUrl('');
+    setClientErrors({});
   };
 
   const inputProps = (name) => ({
@@ -41,65 +58,54 @@ export default function ContactForm() {
     name,
     value: values[name],
     onChange: handleChange,
-    'aria-invalid': errors[name] ? 'true' : undefined,
-    'aria-describedby': errors[name] ? `contact-${name}-error` : undefined,
-    className: `input ${errors[name] ? 'input-error' : ''}`,
+    'aria-invalid': clientErrors[name] ? 'true' : undefined,
+    'aria-describedby': clientErrors[name] ? `contact-${name}-error` : undefined,
+    className: `input ${clientErrors[name] ? 'input-error' : ''}`,
   });
 
   if (status === 'success') {
     return (
       <div className="py-6 text-center" role="status">
         <CheckCircle2 className="mx-auto h-14 w-14 text-brand" aria-hidden="true" />
-        <h3 className="mt-5 text-3xl font-extrabold uppercase tracking-wide text-white">Message sent</h3>
-        <p className="mx-auto mt-3 max-w-sm text-fog-300">{message}</p>
-        <Button variant="outline" className="mt-7" onClick={reset}>
-          Send another message
-        </Button>
+        <h3 className="mt-5 text-3xl font-extrabold uppercase tracking-wide text-white">Message Ready in WhatsApp</h3>
+        <p className="mx-auto mt-3 max-w-sm text-fog-300">
+          Message details are ready in WhatsApp. If WhatsApp did not open automatically, click the button below.
+        </p>
+        <div className="mt-7 flex flex-wrap justify-center gap-3">
+          {waUrl && (
+            <Button href={waUrl} target="_blank" rel="noopener noreferrer">
+              <MessageSquare className="h-4 w-4" aria-hidden="true" />
+              Open in WhatsApp
+            </Button>
+          )}
+          <Button variant="outline" onClick={handleReset}>
+            Send another message
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
     <form onSubmit={handleSubmit} noValidate className="relative grid gap-5 sm:grid-cols-2">
-      <Field label="Name" htmlFor="contact-name" error={errors.name}>
+      <Field label="Name" htmlFor="contact-name" error={clientErrors.name}>
         <input type="text" autoComplete="name" placeholder="Your full name" {...inputProps('name')} />
       </Field>
-      <Field label="Email" htmlFor="contact-email" error={errors.email}>
-        <input type="email" autoComplete="email" placeholder="you@example.com" {...inputProps('email')} />
-      </Field>
-      <Field label="Phone" htmlFor="contact-phone" error={errors.phone} optional className="sm:col-span-2">
+
+      <Field label="Phone" htmlFor="contact-phone" error={clientErrors.phone}>
         <input type="tel" autoComplete="tel" inputMode="tel" placeholder="10-digit mobile number" {...inputProps('phone')} />
       </Field>
-      <Field label="Message" htmlFor="contact-message" error={errors.message} className="sm:col-span-2">
+
+      <Field label="Message" htmlFor="contact-message" error={clientErrors.message} className="sm:col-span-2">
         <textarea rows={5} placeholder="How can we help?" {...inputProps('message')} />
       </Field>
 
-      <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
-        <label>
-          Website
-          <input type="text" name="website" tabIndex={-1} autoComplete="off" value={values.website} onChange={handleChange} />
-        </label>
-      </div>
-
-      {status === 'error' && (
-        <div role="alert" className="flex gap-3 rounded-md border border-red-400/40 bg-red-500/10 p-4 text-sm text-red-200 sm:col-span-2">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
-          <p>{message}</p>
-        </div>
-      )}
-
       <div className="sm:col-span-2">
-        <Button type="submit" size="lg" disabled={submitting} className="w-full">
-          {submitting ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              Sending…
-            </>
-          ) : (
-            'Send Message'
-          )}
+        <Button type="submit" size="lg" className="w-full">
+          SEND MESSAGE
         </Button>
       </div>
     </form>
   );
 }
+
